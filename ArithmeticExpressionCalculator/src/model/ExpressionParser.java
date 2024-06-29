@@ -40,6 +40,7 @@ public final class ExpressionParser {
 	public static String shuntingYard(final String theInfixExpression) {
 		String outputString = "";
 		Deque<Character> operatorStack = new ArrayDeque<Character>();
+		myIsValid = true; // resets the boolean, unless updated further down
 
 		for (int i = 0; i < theInfixExpression.length(); i++) {
 			char c = theInfixExpression.charAt(i);
@@ -50,10 +51,16 @@ public final class ExpressionParser {
 				operatorStack.push(c);
 			} else if (c == ')') {
 				// adds the operator to the string after it's two surrounding operands
-				while (operatorStack.peek() != '(' && !operatorStack.isEmpty()) {
-					outputString += operatorStack.pop();
+				try {
+					while (operatorStack.peek() != '(' && !operatorStack.isEmpty()) {
+						outputString += operatorStack.pop();
+					}
+					operatorStack.pop(); // pops the corresponding opening parenthesis
+				} catch (Exception error) {
+					setIsValid(false);
+					return "";
 				}
-				operatorStack.pop(); // pops the corresponding opening parenthesis
+				// operatorStack.pop(); // moved within the try
 			} else { // if this statement is reached, it handles the operators on top of stack
 				while (!operatorStack.isEmpty() &&
 				    (getPrecedence(c) <= getPrecedence(operatorStack.peek())) &&
@@ -67,13 +74,13 @@ public final class ExpressionParser {
 		while (!operatorStack.isEmpty()) {
 			if (operatorStack.peek() == '(') {
 				setIsValid(false);
-				return "Not a valid arithmetic expression.";
+				return ""; // a return statement is needed to stop the method
 			} else {
 				setIsValid(true);
 				outputString += operatorStack.pop();
 			}
 		}
-		System.out.println("\n" + outputString);
+		// System.out.println("\n" + outputString);
 		return outputString;
 	}
 
