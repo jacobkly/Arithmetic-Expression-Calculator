@@ -56,11 +56,10 @@ public final class ExpressionParser {
 						outputString += operatorStack.pop();
 					}
 					operatorStack.pop(); // pops the corresponding opening parenthesis
-				} catch (Exception error) {
+				} catch (Exception error) { // catches misplaced closing parenthesis
 					setIsValid(false);
 					return "";
 				}
-				// operatorStack.pop(); // moved within the try
 			} else { // if this statement is reached, it handles the operators on top of stack
 				while (!operatorStack.isEmpty() &&
 				    (getPrecedence(c) <= getPrecedence(operatorStack.peek())) &&
