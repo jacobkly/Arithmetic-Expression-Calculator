@@ -6,78 +6,107 @@ package model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * This class implements the shunting yard algorithm by Edsger Dijkstra to parse arithmetic
- * expressions. It takes in a String in infix notation and outputs a Queue in RPN notation.
+ * expressions. It takes in a String in infix notation and outputs a String in RPN notation.
+ * This implementation only parses single digit integers and the following five operators:
+ * -, +, /, *, ^.
  *
  * @author Jacob Klymenko
- * @version 1.1
+ * @version 1.2
  */
 public final class ExpressionParser {
 
-	/** A boolean variable keeping track if the input expression is valid. */
-	private static boolean myIsValid;
+	/**
+	 * A boolean variable keeping track if the input expression is valid. Specifically, if
+	 * it contains misplaced parentheses.
+	 */
+	private static boolean myIsValid = true;
 
 	/** A private constructor to inhibit external instantiation. */
 	private ExpressionParser() {
 		// do nothing
 	}
 
-	public static Queue<Character> shuntingYard(final String theInfixExpression) {
-		String infixExpression = theInfixExpression.replaceAll("\\s", "");
-
-		Queue<Character> outputQueue = new LinkedList<Character>();
+	/**
+	 * This implementation of the shunting yard algorithm, originally created by Edsger
+	 * Dijkstra, parses infix notation arithmetic expressions, and converts it to a post-fix
+	 * notation string (or RPN).
+	 *
+	 * @param theInfixExpression the infix notation expression being converted into post-fix
+	 * @return the RPN expression of the parameter infix notation arithmetic expression
+	 */
+	public static String shuntingYard(final String theInfixExpression) {
+		String outputString = "";
 		Deque<Character> operatorStack = new ArrayDeque<Character>();
 
-		for (int i = 0; i < infixExpression.length(); i++) {
-			char c = infixExpression.charAt(i);
+		for (int i = 0; i < theInfixExpression.length(); i++) {
+			char c = theInfixExpression.charAt(i);
 
 			if (Character.isDigit(c)) {
-				outputQueue.add(c);
+				outputString += c;
 			} else if (c == '(') {
 				operatorStack.push(c);
 			} else if (c == ')') {
+				// adds the operator to the string after it's two surrounding operands
 				while (operatorStack.peek() != '(' && !operatorStack.isEmpty()) {
-					outputQueue.add(operatorStack.pop());
+					outputString += operatorStack.pop();
 				}
+				operatorStack.pop(); // pops the corresponding opening parenthesis
 			} else { // if this statement is reached, it handles the operators on top of stack
 				while (!operatorStack.isEmpty() &&
 				    (getPrecedence(c) <= getPrecedence(operatorStack.peek())) &&
 				    isLeftAssociative(c)) {
-					outputQueue.add(operatorStack.pop());
+					outputString += operatorStack.pop();
 				}
-				operatorStack.add(c);
+				operatorStack.push(c);
 			}
 		}
-
+		// deals with the last elems in the stack; whether they are operators or parentheses
 		while (!operatorStack.isEmpty()) {
 			if (operatorStack.peek() == '(') {
 				setIsValid(false);
+				return "Not a valid arithmetic expression.";
 			} else {
 				setIsValid(true);
-				outputQueue.add(operatorStack.pop());
+				outputString += operatorStack.pop();
 			}
-
 		}
-
-		return outputQueue;
+		System.out.println("\n" + outputString);
+		return outputString;
 	}
 
+	/**
+	 * Sets the class boolean myIsValid to either true or false.
+	 *
+	 * @param theBoolean the boolean value
+	 */
 	private static void setIsValid(final boolean theBoolean) {
 		myIsValid = theBoolean;
 	}
 
+	/**
+	 * Returns the value of class boolean myIsValid.
+	 *
+	 * @return the value of class boolean myIsValid
+	 */
 	public static boolean getIsValid() {
 		return myIsValid;
 	}
 
-	private static int getPrecedence(final Character theCharacter) {
-		int precedence = 1;
+	/**
+	 * Returns the precedence of the operator, displayed as a Character, as an integer. Meaning
+	 * the order in which operators are evaluated in an expression. In this implementation, the
+	 * greater the number, the higher the precedence of the operator, and vice versa.
+	 *
+	 * @param theChar the operator
+	 * @return the precedence of the operator as an integer
+	 */
+	private static int getPrecedence(final Character theChar) {
+		int precedence = -1;
 
-		switch (theCharacter) {
+		switch (theChar) {
 			case '-':
 				precedence = 2;
 				break;
@@ -98,11 +127,19 @@ public final class ExpressionParser {
 		return precedence;
 	}
 
-	private static boolean isLeftAssociative(final Character theCharacter) {
+	/**
+	 * Returns true if the operator, displayed as a Character, is left associate. Meaning the
+	 * operators of the same precedence are evaluated in the order from left to right.
+	 * Otherwise return false.
+	 *
+	 * @param theChar the operator
+	 * @return true if the operator is left associative; otherwise false
+	 */
+	private static boolean isLeftAssociative(final Character theChar) {
 		boolean result;
 
-		if (theCharacter == '-' || theCharacter == '+' ||
-		    theCharacter == '/' || theCharacter == '*') {
+		if (theChar == '-' || theChar == '+' ||
+		    theChar == '/' || theChar == '*') {
 			result = true;
 		} else {
 			result = false;

@@ -4,7 +4,6 @@
 
 package view;
 
-import java.util.Queue;
 import java.util.Scanner;
 import model.ExpressionParser;
 import model.PostfixEvaluator;
@@ -12,12 +11,16 @@ import model.PostfixEvaluator;
 /**
  * A program to perform basic calculations of arithmetic expressions through console. In more
  * elementary terms, this program performs calculations according to the PEMDAS (or BEDMAS or
- * PE(MD)AS) rule.
+ * PE(MD)AS) rule. This program is only able to calculate single digit integers and the
+ * following five operators: -, +, /, *, ^.
  *
  * @author Jacob Klymenko
- * @version 1.1
+ * @version 1.2
  */
 public final class CalculatorMain {
+
+	/** The user inputed infix notation arithmetic expression. */
+	private static String myUserInput = "";
 
 	/** A private constructor to inhibit external instantiation. */
 	private CalculatorMain() {
@@ -51,49 +54,55 @@ public final class CalculatorMain {
 	}
 
 	/**
-	 * Starts the first round of evaluating an arithmetic expression into its respective value.
+	 * Starts the first round of asking for and evaluating an arithmetic expression into its
+	 * respective value.
 	 *
 	 * @param theConsole a Scanner used to gather user input
 	 */
 	private static void start(final Scanner theConsole) {
 		final String prompt = "\nEnter an arithmetic expression to evaluate: ";
-		final String input = getString(theConsole, prompt);
-		final Queue<Character> rpn = ExpressionParser.shuntingYard(input);
-		System.out.println("\n" + rpn);
-		final double output = PostfixEvaluator.evaluate(rpn);
-		reportResult(input, output);
+		final String rpn = getRPN(theConsole, prompt);
+		try {
+			final double output = PostfixEvaluator.evaluate(rpn);
+			reportResult(output);
+		} catch (Exception error) {
+			System.out.println("Error has occured! Invalid input...");
+		}
+
 	}
 
 	/**
-	 * Repeatedly waits for an arithmetic expression to be entered. If the input is not a
-	 * valid arithmetic expression, the user is prompted once more.
+	 * Repeatedly waits for an arithmetic infix expression to be entered by the user. It
+	 * evaluates the first input, and if it's not a valid expression (contains misplaced
+	 * parentheses), the user is prompted once more. In the end, it returns the post-fix
+	 * notation (RPN) of the user inputed infix notation expression.
 	 *
 	 * @param theConsole a Scanner used to gather user input
-	 * @param thePrompt the prompt to display
-	 * @return the arithmetic expression string entered by the user
+	 * @param thePrompt the prompt to display to the user
+	 * @return the post-fix notation (RPN) of the user inputed infix notation expression
 	 */
-	private static String getString(final Scanner theConsole, final String thePrompt) {
+	private static String getRPN(final Scanner theConsole, final String thePrompt) {
 		System.out.print(thePrompt);
+		myUserInput = theConsole.next();
+		String rpn = ExpressionParser.shuntingYard(myUserInput);
 
-		// Some type of check needs to occur to see if it's a valid expression.
+		while (!ExpressionParser.getIsValid()) {
+			System.out.println("Not a valid arithmetic expression. Please try again.");
+			System.out.print(thePrompt);
+			myUserInput = theConsole.next();
+			rpn = ExpressionParser.shuntingYard(myUserInput);
+		}
 
-		// while (!theConsole.hasNext()) {
-		// theConsole.next();
-		// System.out.println("Not a valid arithmetic expression. Please try again.");
-		// System.out.print(thePrompt);
-		// }
-
-		return theConsole.next();
+		return rpn;
 	}
 
 	/**
 	 * Reports the user entered expression and resulting value.
 	 *
-	 * @param theInput the user entered expression
-	 * @param output the value of the expression
+	 * @param output the value of the user inputed arithmetic expression
 	 */
-	private static void reportResult(final String theInput, final double output) {
-		System.out.println("\n" + theInput + '=' + output);
+	private static void reportResult(final double output) {
+		System.out.println("\n" + myUserInput + " = " + output);
 	}
 
 	/**
