@@ -6,7 +6,9 @@ package view;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import model.AETEvaluator;
 import model.ExpressionParser;
+import structures.AETNode;
 
 /**
  *
@@ -40,23 +42,25 @@ public final class CalculatorMain {
 	private static void start(final Scanner theConsole) {
 		final String prompt = "\nEnter an expression: ";
 		final ArrayList<String> list = getList(theConsole, prompt);
-		reportResult(myUserInput);
+		final AETNode tree = ExpressionParser.shuntingYard(list);
+		final double output = AETEvaluator.evaluateAET(tree);
+		reportResult(myUserInput, output);
 	}
 
 	private static ArrayList<String> getList(final Scanner theConsole,
 	    final String thePrompt) {
-		ArrayList<String> result = new ArrayList<>();
+		ArrayList<String> list = new ArrayList<>();
 
 		System.out.print(thePrompt);
 		myUserInput = theConsole.nextLine();
-		result = ExpressionParser.stringToList(myUserInput);
-		// System.out.println(result); // test to see the converted list
+		list = ExpressionParser.stringToList(myUserInput);
+		// System.out.println(list); // test to see the converted list
 
-		return result;
+		return list;
 	}
 
-	private static void reportResult(final String theExpression) {
-		System.out.println("\n" + theExpression);
+	private static void reportResult(final String theExpression, final double theOutput) {
+		System.out.println("\n" + theExpression + " = " + theOutput);
 	}
 
 	/**
