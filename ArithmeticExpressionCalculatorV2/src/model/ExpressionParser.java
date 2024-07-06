@@ -19,6 +19,12 @@ import structures.AETNode;
  */
 public class ExpressionParser {
 
+	/**
+	 * A boolean variable keeping track if the input expression is valid. Specifically, if
+	 * it contains misplaced parentheses.
+	 */
+	private static boolean myIsValid = true;
+
 	/** A private constructor to inhibit external instantiation. */
 	private ExpressionParser() {
 		// do nothing
@@ -48,42 +54,103 @@ public class ExpressionParser {
 		return result;
 	}
 
-	public static AETNode shuntingYard(final ArrayList<String> theInfixList) {
+	public static ArrayList<String> shuntingYardRPN(final ArrayList<String> theInfixList) {
+		ArrayList<String> output = new ArrayList<String>();
 		Deque<String> operatorStack = new ArrayDeque<String>();
-		Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
+		myIsValid = true; // resets the boolean value, unless updated again further down
 
 		for (String s : theInfixList) {
-			char c = s.charAt(0);
-			String popped;
-
-			if (Character.isDigit(c)) {
-				operandStack.push(new AETNode(s, null, null));
-			} else if (s == "(") {
+			if (isNumber(s)) {
+				output.add(s);
+			} else if (s.charAt(0) == '(') {
 				operatorStack.push(s);
-			} else if (s == ")") {
-				while (!operatorStack.isEmpty()) {
-					popped = operatorStack.pop();
-					if (popped == "(") {
-						continue;
-					} else {
-						addNode(operandStack, popped);
-					}
+			} else if (s.charAt(0) == ')') {
+				while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty()) {
+					output.add(operatorStack.pop());
 				}
-				throw new IllegalStateException("Misplaced closing parenthesis. " +
-				    "Please try again.");
+				if (operatorStack.peek() == "(") {
+					operatorStack.pop();
+				}
 			} else {
 				while (!operatorStack.isEmpty() &&
-				    (getPrecedence(c) <= getPrecedence(operatorStack.peek().charAt(0))) &&
-				    isLeftAssociative(c)) {
-					operandStack.push(new AETNode(operatorStack.pop(), null, null));
+				    (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
+				    isLeftAssociative(s)) {
+					output.add(operatorStack.pop());
 				}
 				operatorStack.push(s);
 			}
 		}
 		while (!operatorStack.isEmpty()) {
-			addNode(operandStack, operatorStack.pop());
+			if (operatorStack.peek().charAt(0) == '(') {
+				setIsValid(false);
+				break;
+			} else {
+				output.add(operatorStack.pop());
+				setIsValid(true);
+			}
 		}
+		return output;
+	}
+
+	public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
+		Deque<String> operatorStack = new ArrayDeque<String>();
+		Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
+
+		// for (String s : theInfixList) {
+		// char c = s.charAt(0);
+		// String popped;
+		//
+		// if (Character.isDigit(c)) {
+		// operandStack.push(new AETNode(s, null, null));
+		// } else if (s == "(") {
+		// operatorStack.push(s);
+		// } else if (s == ")") {
+		// while (!operatorStack.isEmpty()) {
+		// popped = operatorStack.pop();
+		// if (popped == "(") {
+		// continue;
+		// } else {
+		// addNode(operandStack, popped);
+		// }
+		// }
+		// throw new IllegalStateException("Misplaced closing parenthesis. " +
+		// "Please try again.");
+		// } else {
+		// while (!operatorStack.isEmpty() &&
+		// (getPrecedence(c) <= getPrecedence(operatorStack.peek().charAt(0))) &&
+		// isLeftAssociative(c)) {
+		// operandStack.push(new AETNode(operatorStack.pop(), null, null));
+		// }
+		// operatorStack.push(s);
+		// }
+		// }
+		// while (!operatorStack.isEmpty()) {
+		// addNode(operandStack, operatorStack.pop());
+		// }
 		return operandStack.pop();
+	}
+
+	/**
+	 * Sets the class boolean myIsValid to either true or false.
+	 *
+	 * @param theBoolean the boolean value
+	 */
+	private static void setIsValid(final boolean theBoolean) {
+		myIsValid = theBoolean;
+	}
+
+	/**
+	 * Returns the value of class boolean myIsValid.
+	 *
+	 * @return the value of class boolean myIsValid
+	 */
+	public static boolean getIsValid() {
+		return myIsValid;
+	}
+
+	private static boolean isNumber(final String theString) {
+		// matches a number with optional '-' and decimal.
+		return theString.matches("-?\\d+(\\.\\d+)?");
 	}
 
 	private static void addNode(final Deque<AETNode> theStack, final String theOperator) {
@@ -92,31 +159,23 @@ public class ExpressionParser {
 		theStack.push(new AETNode(theOperator, leftASTNode, rightASTNode));
 	}
 
-	/**
-	 * Returns the precedence of the operator, displayed as a Character, as an integer. Meaning
-	 * the order in which operators are evaluated in an AETression. In this implementation, the
-	 * greater the number, the higher the precedence of the operator, and vice versa.
-	 *
-	 * @param theChar the operator
-	 * @return the precedence of the operator as an integer
-	 */
-	private static int getPrecedence(final Character theChar) {
+	private static int getPrecedence(final String theOperator) {
 		int precedence = -1;
 
-		switch (theChar) {
-			case '-':
+		switch (theOperator) {
+			case "-":
 				precedence = 2;
 				break;
-			case '+':
+			case "+":
 				precedence = 2;
 				break;
-			case '/':
+			case "/":
 				precedence = 3;
 				break;
-			case '*':
+			case "*":
 				precedence = 3;
 				break;
-			case '^':
+			case "^":
 				precedence = 4;
 				break;
 		}
@@ -124,19 +183,11 @@ public class ExpressionParser {
 		return precedence;
 	}
 
-	/**
-	 * Returns true if the operator, displayed as a Character, is left associate. Meaning the
-	 * operators of the same precedence are evaluated in the order from left to right.
-	 * Otherwise return false.
-	 *
-	 * @param theChar the operator
-	 * @return true if the operator is left associative; otherwise false
-	 */
-	private static boolean isLeftAssociative(final Character theChar) {
+	private static boolean isLeftAssociative(final String theOperator) {
 		boolean result;
 
-		if (theChar == '-' || theChar == '+' ||
-		    theChar == '/' || theChar == '*') {
+		if (theOperator == "-" || theOperator == "+" ||
+		    theOperator == "/" || theOperator == "*") {
 			result = true;
 		} else {
 			result = false;
