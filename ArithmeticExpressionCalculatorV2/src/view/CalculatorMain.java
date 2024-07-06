@@ -27,6 +27,7 @@ public final class CalculatorMain {
 
 	public static void main(final String[] theArgs) {
 		System.out.println("there was a beginning...");
+		ExpressionParser.initializeFunctions();
 		try (Scanner console = new Scanner(System.in)) {
 			for (;;) {
 				start(console);

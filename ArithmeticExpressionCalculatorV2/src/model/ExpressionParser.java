@@ -25,22 +25,38 @@ public class ExpressionParser {
 	 */
 	private static boolean myIsValid = true;
 
+	/**
+	 * Integer:
+	 * 		0 --> no base value
+	 * 		1 --> has base value
+	 */
+	private static Map<String, Integer> myValidFunctions = new HashMap<String, Integer>();
+
 	/** A private constructor to inhibit external instantiation. */
 	private ExpressionParser() {
 		// do nothing
 	}
 
+	public static void initializeFunctions() {
+		myValidFunctions.put("sin", 0);
+		myValidFunctions.put("cos", 0);
+		myValidFunctions.put("tan", 0);
+		myValidFunctions.put("sec", 0);
+		myValidFunctions.put("csc", 0);
+		myValidFunctions.put("cot", 0);
+		myValidFunctions.put("log", 1);
+		myValidFunctions.put("ln(", 1);
+	}
+
 	public static ArrayList<String> stringToList(final String theUserInput) {
 		ArrayList<String> result = new ArrayList<>();
 		Map<Integer, String> map = new HashMap<Integer, String>();
-
 		// keeps track of all the space characters from the input string in a map
 		for (int i = 0; i < theUserInput.length(); i++) {
 			if (theUserInput.charAt(i) == ' ') {
 				map.put(i, " ");
 			}
 		}
-
 		// adds everything in between the space characters separately in the list
 		int track = 0;
 		for (int j = 0; j < theUserInput.length(); j++) {
@@ -50,7 +66,6 @@ public class ExpressionParser {
 			}
 		}
 		result.add(theUserInput.substring(track)); // adds the last part of the input
-
 		return result;
 	}
 
@@ -62,14 +77,26 @@ public class ExpressionParser {
 		for (String s : theInfixList) {
 			if (isNumber(s)) {
 				output.add(s);
+			} else if (s.length() > 1 && myValidFunctions.containsKey(s.substring(0, 3))) {
+				operatorStack.push(s);
 			} else if (s.charAt(0) == '(') {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == ')') {
-				while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty()) {
+				String top = operatorStack.peek();
+				boolean isFunction = top.length() > 1 &&
+				    myValidFunctions.containsKey(top.substring(0, 3));
+
+				while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
+				    !isFunction) {
 					output.add(operatorStack.pop());
 				}
-				if (operatorStack.peek() == "(") {
+				if (operatorStack.peek().charAt(0) == '(') {
 					operatorStack.pop();
+				}
+				if (isFunction) {
+					final double functionResult =
+					    Evaluator.evaluateFunction(operatorStack.pop());
+					output.add(String.valueOf(functionResult));
 				}
 			} else {
 				while (!operatorStack.isEmpty() &&
@@ -89,6 +116,7 @@ public class ExpressionParser {
 				setIsValid(true);
 			}
 		}
+		System.out.println("\n" + output);
 		return output;
 	}
 

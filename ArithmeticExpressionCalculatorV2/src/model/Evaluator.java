@@ -59,6 +59,43 @@ public class Evaluator {
 		}
 	}
 
+	public static double evaluateFunction(final String theFunction) {
+		double result = 0.0;
+		final int openBracket = theFunction.indexOf("(");
+		final int closedBracket = theFunction.indexOf(")");
+		final String insideBracketValue =
+		    theFunction.substring(openBracket + 1, closedBracket);
+		final double insideValue = Double.parseDouble(insideBracketValue);
+
+		if (theFunction.substring(0, 2) == "ln") {
+			result = Math.log(insideValue);
+		} else {
+			switch (theFunction.substring(0, 3)) {
+				case "log":
+					if (theFunction.contains("_")) {
+						int underscore = theFunction.indexOf('_');
+						String baseString = theFunction.substring(underscore + 1, openBracket);
+						double baseValue = Double.parseDouble(baseString);
+						result = Math.log(insideValue) / Math.log(baseValue);
+					} else {
+						result = Math.log(insideValue) / Math.log(10);
+					}
+				case "sin":
+
+				case "cos":
+
+				case "tan":
+
+				case "sec":
+
+				case "csc":
+
+				case "cot":
+			}
+		}
+		return result;
+	}
+
 	private static boolean isNumber(final String theString) {
 		// matches a number with optional '-' and decimal.
 		return theString.matches("-?\\d+(\\.\\d+)?");
