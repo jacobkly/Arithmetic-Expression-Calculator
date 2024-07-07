@@ -77,23 +77,20 @@ public class ExpressionParser {
 		for (String s : theInfixList) {
 			if (isNumber(s)) {
 				output.add(s);
-			} else if (s.length() > 1 && myValidFunctions.containsKey(s.substring(0, 3))) {
+			} else if (isFunction(s)) {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == '(') {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == ')') {
 				String top = operatorStack.peek();
-				boolean isFunction = top.length() > 1 &&
-				    myValidFunctions.containsKey(top.substring(0, 3));
-
 				while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
-				    !isFunction) {
+				    !isFunction(top)) {
 					output.add(operatorStack.pop());
 				}
 				if (operatorStack.peek().charAt(0) == '(') {
 					operatorStack.pop();
 				}
-				if (isFunction) {
+				if (isFunction(top)) {
 					final double functionResult =
 					    Evaluator.evaluateFunction(operatorStack.pop());
 					output.add(String.valueOf(functionResult));
@@ -112,7 +109,13 @@ public class ExpressionParser {
 				setIsValid(false);
 				break;
 			} else {
-				output.add(operatorStack.pop());
+				if (isFunction(operatorStack.peek())) {
+					final double functionResult =
+					    Evaluator.evaluateFunction(operatorStack.pop());
+					output.add(String.valueOf(functionResult));
+				} else {
+					output.add(operatorStack.pop());
+				}
 				setIsValid(true);
 			}
 		}
@@ -179,6 +182,11 @@ public class ExpressionParser {
 	private static boolean isNumber(final String theString) {
 		// matches a number with optional '-' and decimal.
 		return theString.matches("-?\\d+(\\.\\d+)?");
+	}
+
+	private static boolean isFunction(final String theString) {
+		return theString.length() > 1 &&
+		    myValidFunctions.containsKey(theString.substring(0, 3));
 	}
 
 	private static void addNode(final Deque<AETNode> theStack, final String theOperator) {

@@ -17,6 +17,10 @@ import structures.AETNode;
  */
 public class Evaluator {
 
+	private final static double POS_TOLERANCE = 0.000001;
+
+	private final static double NEG_TOLERANCE = -0.000001;
+
 	/** A private constructor to inhibit external instantiation. */
 	private Evaluator() {
 		// do nothing
@@ -63,9 +67,11 @@ public class Evaluator {
 		double result = 0.0;
 		final int openBracket = theFunction.indexOf("(");
 		final int closedBracket = theFunction.indexOf(")");
-		final String insideBracketValue =
+		final String insideBracket =
 		    theFunction.substring(openBracket + 1, closedBracket);
-		final double insideValue = Double.parseDouble(insideBracketValue);
+		final double insideValue = Double.parseDouble(insideBracket);
+		final double radianValue = Math.toRadians(insideValue); // from degrees to radians
+		// user input for trig functions only in degrees, must change to radians
 
 		if (theFunction.substring(0, 2) == "ln") {
 			result = Math.log(insideValue);
@@ -80,17 +86,43 @@ public class Evaluator {
 					} else {
 						result = Math.log(insideValue) / Math.log(10);
 					}
+					break;
 				case "sin":
-
+					result = Math.sin(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 				case "cos":
-
+					result = Math.cos(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 				case "tan":
-
+					result = Math.tan(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 				case "sec":
-
+					result = 1 / Math.cos(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 				case "csc":
-
+					result = 1 / Math.sin(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 				case "cot":
+					result = 1 / Math.tan(radianValue);
+					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+						result = 0;
+					}
+					break;
 			}
 		}
 		return result;
