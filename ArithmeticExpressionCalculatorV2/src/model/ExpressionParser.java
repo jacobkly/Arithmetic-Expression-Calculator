@@ -82,18 +82,23 @@ public class ExpressionParser {
 			} else if (s.charAt(0) == '(') {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == ')') {
-				String top = operatorStack.peek();
-				while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
-				    !isFunction(top)) {
-					output.add(operatorStack.pop());
-				}
-				if (operatorStack.peek().charAt(0) == '(') {
-					operatorStack.pop();
-				}
-				if (isFunction(top)) {
-					final double functionResult =
-					    Evaluator.evaluateFunction(operatorStack.pop());
-					output.add(String.valueOf(functionResult));
+				try {
+					String top = operatorStack.peek();
+					while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
+					    !isFunction(top)) {
+						output.add(operatorStack.pop());
+					}
+					if (operatorStack.peek().charAt(0) == '(') {
+						operatorStack.pop();
+					}
+					if (isFunction(top)) {
+						final double functionResult =
+						    Evaluator.evaluateFunction(operatorStack.pop());
+						output.add(String.valueOf(functionResult));
+					}
+				} catch (final Exception error) {
+					setIsValid(false);
+					break;
 				}
 			} else {
 				while (!operatorStack.isEmpty() &&
@@ -123,43 +128,43 @@ public class ExpressionParser {
 		return output;
 	}
 
-	public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
-		Deque<String> operatorStack = new ArrayDeque<String>();
-		Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
-
-		// for (String s : theInfixList) {
-		// char c = s.charAt(0);
-		// String popped;
-		//
-		// if (Character.isDigit(c)) {
-		// operandStack.push(new AETNode(s, null, null));
-		// } else if (s == "(") {
-		// operatorStack.push(s);
-		// } else if (s == ")") {
-		// while (!operatorStack.isEmpty()) {
-		// popped = operatorStack.pop();
-		// if (popped == "(") {
-		// continue;
-		// } else {
-		// addNode(operandStack, popped);
-		// }
-		// }
-		// throw new IllegalStateException("Misplaced closing parenthesis. " +
-		// "Please try again.");
-		// } else {
-		// while (!operatorStack.isEmpty() &&
-		// (getPrecedence(c) <= getPrecedence(operatorStack.peek().charAt(0))) &&
-		// isLeftAssociative(c)) {
-		// operandStack.push(new AETNode(operatorStack.pop(), null, null));
-		// }
-		// operatorStack.push(s);
-		// }
-		// }
-		// while (!operatorStack.isEmpty()) {
-		// addNode(operandStack, operatorStack.pop());
-		// }
-		return operandStack.pop();
-	}
+	// public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
+	// Deque<String> operatorStack = new ArrayDeque<String>();
+	// Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
+	//
+	// for (String s : theInfixList) {
+	// char c = s.charAt(0);
+	// String popped;
+	//
+	// if (Character.isDigit(c)) {
+	// operandStack.push(new AETNode(s, null, null));
+	// } else if (s == "(") {
+	// operatorStack.push(s);
+	// } else if (s == ")") {
+	// while (!operatorStack.isEmpty()) {
+	// popped = operatorStack.pop();
+	// if (popped == "(") {
+	// continue;
+	// } else {
+	// addNode(operandStack, popped);
+	// }
+	// }
+	// throw new IllegalStateException("Misplaced closing parenthesis. " +
+	// "Please try again.");
+	// } else {
+	// while (!operatorStack.isEmpty() &&
+	// (getPrecedence(c) <= getPrecedence(operatorStack.peek().charAt(0))) &&
+	// isLeftAssociative(c)) {
+	// operandStack.push(new AETNode(operatorStack.pop(), null, null));
+	// }
+	// operatorStack.push(s);
+	// }
+	// }
+	// while (!operatorStack.isEmpty()) {
+	// addNode(operandStack, operatorStack.pop());
+	// }
+	// return operandStack.pop();
+	// }
 
 	/**
 	 * Sets the class boolean myIsValid to either true or false.

@@ -41,23 +41,44 @@ public final class CalculatorMain {
 
 	private static void start(final Scanner theConsole) {
 		final String prompt = "\nEnter an expression: ";
-		final ArrayList<String> list = getList(theConsole, prompt);
 		// final AETNode tree = ExpressionParser.shuntingYardTree(list);
 		// final double output = AETEvaluator.evaluateAET(tree);
-		final ArrayList<String> rpn = ExpressionParser.shuntingYardRPN(list);
-		final double output = Evaluator.evaluateRPN(rpn);
-		reportResult(myUserInput, output);
+		final ArrayList<String> rpn = getRPN(theConsole, prompt);
+		try {
+			final double output = Evaluator.evaluateRPN(rpn);
+			reportResult(myUserInput, output);
+		} catch (final Exception error) {
+			System.out.println("Evaluation error has occured!");
+		}
 	}
 
-	private static ArrayList<String> getList(final Scanner theConsole,
-	    final String thePrompt) {
-		ArrayList<String> list = new ArrayList<>();
+	// private static ArrayList<String> getList(final Scanner theConsole,
+	// final String thePrompt) {
+	// ArrayList<String> list = new ArrayList<>();
+	//
+	// System.out.print(thePrompt);
+	// myUserInput = theConsole.nextLine();
+	// list = ExpressionParser.stringToList(myUserInput);
+	//
+	// return list;
+	// }
 
+	private static ArrayList<String> getRPN(final Scanner theConsole, final String thePrompt) {
 		System.out.print(thePrompt);
 		myUserInput = theConsole.nextLine();
-		list = ExpressionParser.stringToList(myUserInput);
+		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
+		ArrayList<String> rpn = ExpressionParser.shuntingYardRPN(list);
 
-		return list;
+		while (!ExpressionParser.getIsValid()) {
+			System.out.println("Not a valid arithmetic expression. \nYour input may " +
+			    "contain misplaced parentheses. \n\nPlease try again.");
+			System.out.print(thePrompt);
+			myUserInput = theConsole.nextLine();
+			list = ExpressionParser.stringToList(myUserInput);
+			rpn = ExpressionParser.shuntingYardRPN(list);
+		}
+
+		return rpn;
 	}
 
 	private static void reportResult(final String theExpression, final double theOutput) {
