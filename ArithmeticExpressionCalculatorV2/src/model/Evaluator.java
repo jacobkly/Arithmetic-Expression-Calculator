@@ -42,8 +42,12 @@ public class Evaluator {
 		Deque<Double> stack = new ArrayDeque<Double>();
 		for (int i = 0; i < theRPN.size(); i++) {
 			String s = theRPN.get(i);
-			if (s.matches("-?\\d+(\\.\\d+)?")) { // identifies if the string is a number
+			if (s.matches("-?\\d+(\\.\\d+)?")) { // if the string is a number
 				stack.push(Double.parseDouble(s));
+			} else if (s.equals("e")) { // if the string is Euler's number
+				stack.push(Math.E);
+			} else if (s.equals("pi")) {
+				stack.push(Math.PI);
 			} else if (isOperator(s.charAt(0))) {
 				double value2 = stack.pop();
 				double value1 = stack.pop();

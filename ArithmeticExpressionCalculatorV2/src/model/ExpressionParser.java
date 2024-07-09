@@ -96,23 +96,25 @@ public class ExpressionParser {
 		myIsValid = true; // resets the boolean value, unless updated again further down
 
 		for (String s : theInfixList) {
-			if (s.matches("-?\\d+(\\.\\d+)?")) { // identifies if the string is a number
+			// identifies if the string is a number, pi, or Euler's number
+			if (s.matches("-?\\d+(\\.\\d+)?") || s.equals("pi") || s.equals("e")) {
 				output.add(s);
 			} else if (isFunction(s)) {
 				operatorStack.push(s);
-			} else if (s.charAt(0) == '(') {
+			} else if (s.equals("(")) {
 				operatorStack.push(s);
-			} else if (s.charAt(0) == ')') {
+			} else if (s.equals(")")) {
 				try {
-					// String top = operatorStack.peek();
-					while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
+					while (!operatorStack.peek().equals("(") && !operatorStack.isEmpty() &&
 					    !isFunction(operatorStack.peek())) {
 						output.add(operatorStack.pop());
 					}
-					if (operatorStack.peek().charAt(0) == '(') {
+					if (operatorStack.peek().equals("(")) {
 						operatorStack.pop();
 					}
-					if (isFunction(operatorStack.peek())) { // previously param was top
+					// gotta check for null b/c previous if statement might empty out the stack
+					// when dealing with the last closing parenthesis
+					if (operatorStack.equals(null) && isFunction(operatorStack.peek())) {
 						output.add(operatorStack.pop());
 					}
 				} catch (final Exception error) {
@@ -129,7 +131,7 @@ public class ExpressionParser {
 			}
 		}
 		while (!operatorStack.isEmpty()) {
-			if (operatorStack.peek().charAt(0) == '(') {
+			if (operatorStack.peek().equals("(")) {
 				setIsValid(false);
 				break;
 			} else {
@@ -138,10 +140,9 @@ public class ExpressionParser {
 				} else {
 					output.add(operatorStack.pop());
 				}
-				setIsValid(true);
 			}
 		}
-		// System.out.println("\n" + output);
+		System.out.println("\n" + output);
 		return output;
 	}
 
