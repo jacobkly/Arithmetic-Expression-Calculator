@@ -14,15 +14,15 @@ import structures.AETNode;
  * the resulting value.
  *
  * @author Jacob Klymenko
- * @version 2.0
+ * @version 2.1
  */
 public class Evaluator {
 
 	/** The positive tolerance of a value. Meant for rounding to zero purposes. */
-	private final static double POS_TOLERANCE = 0.000001;
+	private final static double POS_TOLERANCE = 0.00000001;
 
 	/** The negative tolerance of a value. Meant for rounding to zero purposes. */
-	private final static double NEG_TOLERANCE = -0.000001;
+	private final static double NEG_TOLERANCE = -0.00000001;
 
 	/** A private constructor to inhibit external instantiation. */
 	private Evaluator() {
@@ -47,7 +47,10 @@ public class Evaluator {
 			} else if (isOperator(s.charAt(0))) {
 				double value2 = stack.pop();
 				double value1 = stack.pop();
-				stack.push(applyOperator(value1, value2, s));
+				stack.push(applyOperator(s, value1, value2));
+			} else { // if reached, the function is handled
+				double value = stack.pop();
+				stack.push(applyFunction(s, value));
 			}
 		}
 		return stack.peek();
@@ -82,77 +85,6 @@ public class Evaluator {
 	}
 
 	/**
-	 * Evaluates logarithmic or trigonometric functions. Takes into the consideration of base
-	 * values. The trigonometric argument angle values are initially in degrees, but are
-	 * converted into radians to be evaluated by the Java Math class.
-	 *
-	 * @param theFunction the function being evaluated
-	 * @return the value of the function
-	 */
-	public static double evaluateFunction(final String theFunction) {
-		double result = 0.0;
-		final int openBracket = theFunction.indexOf("(");
-		final int closedBracket = theFunction.indexOf(")");
-		final String insideBracket =
-		    theFunction.substring(openBracket + 1, closedBracket);
-		final double insideValue = Double.parseDouble(insideBracket);
-		final double radianValue = Math.toRadians(insideValue); // from degrees to radians
-		if (theFunction.substring(0, 2) == "ln") {
-			result = Math.log(insideValue);
-		} else {
-			switch (theFunction.substring(0, 3)) {
-				case "log":
-					if (theFunction.contains("_")) {
-						int underscore = theFunction.indexOf('_');
-						String baseString = theFunction.substring(underscore + 1, openBracket);
-						double baseValue = Double.parseDouble(baseString);
-						result = Math.log(insideValue) / Math.log(baseValue);
-					} else {
-						result = Math.log(insideValue) / Math.log(10);
-					}
-					break;
-				case "sin":
-					result = Math.sin(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-				case "cos":
-					result = Math.cos(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-				case "tan":
-					result = Math.tan(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-				case "sec":
-					result = 1 / Math.cos(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-				case "csc":
-					result = 1 / Math.sin(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-				case "cot":
-					result = 1 / Math.tan(radianValue);
-					if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
-						result = 0;
-					}
-					break;
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * Returns true if the character is an operator; otherwise false.
 	 *
 	 * @param theChar the character being examined
@@ -171,13 +103,13 @@ public class Evaluator {
 	 * Returns a double value after applying the operator on the two operands, in the
 	 * designated order of the caller method.
 	 *
+	 * @param theOperator the operator being applied on the two operands
 	 * @param theValue1 the operand to the left of an operator in an infix notation equation
 	 * @param theValue2 the operand to the right of an operator in an infix notation equation
-	 * @param theOperator the operator being applied on the two operands
 	 * @return a double value after applying the operator on the two operands
 	 */
-	private static double applyOperator(final double theValue1, final double theValue2,
-	    final String theOperator) {
+	private static double applyOperator(final String theOperator, final double theValue1,
+	    final double theValue2) {
 		double result = 0;
 
 		switch (theOperator) {
@@ -196,6 +128,59 @@ public class Evaluator {
 			case "^":
 				result = Math.pow(theValue1, theValue2);
 				break;
+		}
+		return result;
+	}
+
+	/**
+	 * Evaluates a logarithmic or trigonometric function. For logarithmic functions (excluding
+	 * natural logarithms), it takes into consideration the potential base values. For
+	 * trigonometric functions, the values are strictly in radians.
+	 *
+	 * @param theFunction the function being evaluated
+	 * @param theValue the value within the function argument
+	 * @return the value of the function
+	 */
+	private static double applyFunction(final String theFunction, final double theValue) {
+		double result = 0.0;
+		// prob not the best to leave if statement w/o the condition 'theFunction == "ln"' or
+		// 'theFunction.substring(0, 2) == "ln"', but that doesn't work here for some reason
+		if (theFunction.length() == 2) {
+			result = Math.log(theValue);
+		} else {
+			switch (theFunction.substring(0, 3)) {
+				case "log":
+					if (theFunction.contains("_")) {
+						// base value is from the underscore till the end of the string
+						final String baseString = theFunction.substring(4);
+						final double baseValue = Double.parseDouble(baseString);
+						result = Math.log(theValue) / Math.log(baseValue);
+					} else {
+						result = Math.log(theValue) / Math.log(10);
+					}
+					break;
+				case "sin":
+					result = Math.sin(theValue);
+					break;
+				case "cos":
+					result = Math.cos(theValue);
+					break;
+				case "tan":
+					result = Math.tan(theValue);
+					break;
+				case "sec":
+					result = 1 / Math.cos(theValue);
+					break;
+				case "csc":
+					result = 1 / Math.sin(theValue);
+					break;
+				case "cot":
+					result = 1 / Math.tan(theValue);
+					break;
+			}
+		}
+		if (result < POS_TOLERANCE && result > NEG_TOLERANCE) {
+			result = 0;
 		}
 		return result;
 	}

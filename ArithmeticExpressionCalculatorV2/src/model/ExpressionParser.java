@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import structures.AETNode;
 
 /**
  * This class implements the shunting yard algorithm by Edsger Dijkstra to parse arithmetic
  * expressions. It also contains useful methods to parse the user inputed expressions.
  *
  * @author Jacob Klymenko
- * @version 2.0
+ * @version 2.1
  */
 public class ExpressionParser {
 
@@ -50,7 +51,7 @@ public class ExpressionParser {
 		myValidFunctions.put("csc", 0);
 		myValidFunctions.put("cot", 0);
 		myValidFunctions.put("log", 1);
-		myValidFunctions.put("ln(", 1);
+		myValidFunctions.put("ln", 1);
 	}
 
 	/**
@@ -103,18 +104,16 @@ public class ExpressionParser {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == ')') {
 				try {
-					String top = operatorStack.peek();
+					// String top = operatorStack.peek();
 					while (operatorStack.peek().charAt(0) != '(' && !operatorStack.isEmpty() &&
-					    !isFunction(top)) {
+					    !isFunction(operatorStack.peek())) {
 						output.add(operatorStack.pop());
 					}
 					if (operatorStack.peek().charAt(0) == '(') {
 						operatorStack.pop();
 					}
-					if (isFunction(top)) {
-						final double functionResult =
-						    Evaluator.evaluateFunction(operatorStack.pop());
-						output.add(String.valueOf(functionResult));
+					if (isFunction(operatorStack.peek())) { // previously param was top
+						output.add(operatorStack.pop());
 					}
 				} catch (final Exception error) {
 					setIsValid(false);
@@ -135,56 +134,64 @@ public class ExpressionParser {
 				break;
 			} else {
 				if (isFunction(operatorStack.peek())) {
-					final double functionResult =
-					    Evaluator.evaluateFunction(operatorStack.pop());
-					output.add(String.valueOf(functionResult));
+					output.add(operatorStack.pop());
 				} else {
 					output.add(operatorStack.pop());
 				}
 				setIsValid(true);
 			}
 		}
-		System.out.println("\n" + output);
+		// System.out.println("\n" + output);
 		return output;
 	}
 
-	// public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
-	// Deque<String> operatorStack = new ArrayDeque<String>();
-	// Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
-	//
-	// for (String s : theInfixList) {
-	// char c = s.charAt(0);
-	// String popped;
-	//
-	// if (Character.isDigit(c)) {
-	// operandStack.push(new AETNode(s, null, null));
-	// } else if (s == "(") {
-	// operatorStack.push(s);
-	// } else if (s == ")") {
-	// while (!operatorStack.isEmpty()) {
-	// popped = operatorStack.pop();
-	// if (popped == "(") {
-	// continue;
-	// } else {
-	// addNode(operandStack, popped);
-	// }
-	// }
-	// throw new IllegalStateException("Misplaced closing parenthesis. " +
-	// "Please try again.");
-	// } else {
-	// while (!operatorStack.isEmpty() &&
-	// (getPrecedence(c) <= getPrecedence(operatorStack.peek().charAt(0))) &&
-	// isLeftAssociative(c)) {
-	// operandStack.push(new AETNode(operatorStack.pop(), null, null));
-	// }
-	// operatorStack.push(s);
-	// }
-	// }
-	// while (!operatorStack.isEmpty()) {
-	// addNode(operandStack, operatorStack.pop());
-	// }
-	// return operandStack.pop();
-	// }
+	public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
+		Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
+		Deque<String> operatorStack = new ArrayDeque<String>();
+
+		// for (String s : theInfixList) {
+		// if (s.matches("-?\\d+(\\.\\d+)?")) { // identifies if the string is a number
+		// operandStack.push(new AETNode(s, null, null));
+		// } else if (s.charAt(0) == '(') {
+		// operatorStack.push(s);
+		// } else if (s.charAt(0) == ')') {
+		//
+		// }
+		// }
+
+		// for (String s : theInfixList) {
+		// char c = s.charAt(0);
+		// String popped;
+		//
+		// if (Character.isDigit(c)) {
+		// operandStack.push(new AETNode(s, null, null));
+		// } else if (s == "(") {
+		// operatorStack.push(s);
+		// } else if (s == ")") {
+		// while (!operatorStack.isEmpty()) {
+		// popped = operatorStack.pop();
+		// if (popped == "(") {
+		// continue;
+		// } else {
+		// addNode(operandStack, popped);
+		// }
+		// }
+		// throw new IllegalStateException("Misplaced closing parenthesis. " +
+		// "Please try again.");
+		// } else {
+		// while (!operatorStack.isEmpty() &&
+		// (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
+		// isLeftAssociative(s)) {
+		// operandStack.push(new AETNode(operatorStack.pop(), null, null));
+		// }
+		// operatorStack.push(s);
+		// }
+		// }
+		// while (!operatorStack.isEmpty()) {
+		// addNode(operandStack, operatorStack.pop());
+		// }
+		return operandStack.pop();
+	}
 
 	/**
 	 * Sets the class boolean myIsValid to either true or false.
@@ -212,8 +219,14 @@ public class ExpressionParser {
 	 * @return true if the string is a function; otherwise false
 	 */
 	private static boolean isFunction(final String theString) {
-		return theString.length() > 1 &&
-		    myValidFunctions.containsKey(theString.substring(0, 3));
+		boolean result = false;
+		final boolean length = theString.length() > 1;
+		if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
+			result = true;
+		} else if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
+			result = true;
+		}
+		return result;
 	}
 
 	/**
@@ -269,9 +282,9 @@ public class ExpressionParser {
 		return result;
 	}
 
-	// private static void addNode(final Deque<AETNode> theStack, final String theOperator) {
-	// final AETNode rightASTNode = theStack.pop();
-	// final AETNode leftASTNode = theStack.pop();
-	// theStack.push(new AETNode(theOperator, leftASTNode, rightASTNode));
-	// }
+	private static void addNode(final Deque<AETNode> theStack, final String theOperator) {
+		final AETNode rightASTNode = theStack.pop();
+		final AETNode leftASTNode = theStack.pop();
+		theStack.push(new AETNode(theOperator, leftASTNode, rightASTNode));
+	}
 }

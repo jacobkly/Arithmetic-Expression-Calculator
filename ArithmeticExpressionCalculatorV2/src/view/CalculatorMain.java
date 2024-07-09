@@ -66,6 +66,7 @@ public final class CalculatorMain {
 			System.out.println("\n" + myUserInput + " = " + output);
 		} catch (final Exception error) {
 			System.out.println("Evaluation error has occured!");
+			// System.err.println(error);
 		}
 	}
 
