@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import model.Evaluator;
 import model.ExpressionParser;
+import structures.AETNode;
 
 /**
  * A console-based program to perform arithmetic expression calculations. It performs the
@@ -57,18 +58,18 @@ public final class CalculatorMain {
 	 */
 	private static void start(final Scanner theConsole) {
 		final String prompt = "\nEnter an expression: ";
-		// final AETNode tree = ExpressionParser.shuntingYardTree(list);
-		// final double output = AETEvaluator.evaluateAET(tree);
-		final ArrayList<String> rpn = getRPN(theConsole, prompt);
-		try {
-			final double output = Evaluator.evaluateRPN(rpn);
-			// Reports the user entered expression and resulting value.
-			System.out.println("\n" + myUserInput + " = " + output);
-		} catch (final Exception error) {
-			System.out.println("Evaluation error has occured!");
-		}
+		// final ArrayList<String> rpn = getRPN(theConsole, prompt);
+		// try {
 		// final double output = Evaluator.evaluateRPN(rpn);
+		// // Reports the user entered expression and resulting value.
 		// System.out.println("\n" + myUserInput + " = " + output);
+		// } catch (final Exception error) {
+		// System.out.println("Evaluation error has occured!");
+		// }
+		final ArrayList<String> list = getList(theConsole, prompt);
+		final AETNode tree = ExpressionParser.shuntingYardTree(list);
+		final double output = Evaluator.evaluateAET(tree);
+		System.out.println("\n" + myUserInput + " = " + output);
 	}
 
 	/**
@@ -98,8 +99,15 @@ public final class CalculatorMain {
 			list = ExpressionParser.stringToList(myUserInput);
 			rpn = ExpressionParser.shuntingYardRPN(list);
 		}
-
 		return rpn;
+	}
+
+	private static ArrayList<String> getList(final Scanner theConsole,
+	    final String thePrompt) {
+		System.out.print(thePrompt);
+		myUserInput = theConsole.nextLine();
+		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
+		return list;
 	}
 
 	/**
@@ -126,7 +134,6 @@ public final class CalculatorMain {
 				System.out.println("I did not understand your answer.");
 			}
 		}
-
 		return response;
 	}
 }

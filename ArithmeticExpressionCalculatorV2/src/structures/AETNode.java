@@ -67,9 +67,9 @@ public class AETNode {
 		return myRightAETNode;
 	}
 
-	// @Override
-	// public String toString() {
-	//
-	// return ""
-	// }
+	@Override
+	public String toString() {
+
+		return "";
+	}
 }

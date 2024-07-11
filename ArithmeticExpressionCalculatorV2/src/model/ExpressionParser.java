@@ -149,16 +149,44 @@ public class ExpressionParser {
 	public static AETNode shuntingYardTree(final ArrayList<String> theInfixList) {
 		Deque<AETNode> operandStack = new ArrayDeque<AETNode>();
 		Deque<String> operatorStack = new ArrayDeque<String>();
+		myIsValid = true;
 
-		// for (String s : theInfixList) {
-		// if (s.matches("-?\\d+(\\.\\d+)?")) { // identifies if the string is a number
-		// operandStack.push(new AETNode(s, null, null));
-		// } else if (s.charAt(0) == '(') {
-		// operatorStack.push(s);
-		// } else if (s.charAt(0) == ')') {
-		//
-		// }
-		// }
+		for (String s : theInfixList) {
+			if (s.matches("-?\\d+(\\.\\d+)?")) {
+				operandStack.push(new AETNode(s, null, null));
+			} else if (s.charAt(0) == '(') {
+				operatorStack.push(s);
+			} else if (s.charAt(0) == ')') {
+				try {
+					while (!operatorStack.peek().equals("(") && !operatorStack.isEmpty()) {
+						addNode(operandStack, operatorStack.pop());
+					}
+					if (operatorStack.peek().equals("(")) {
+						operatorStack.pop();
+					}
+				} catch (final Exception error) {
+					setIsValid(false);
+					break;
+				}
+			} else {
+				while (!operatorStack.isEmpty() &&
+				    (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
+				    isLeftAssociative(s)) {
+					// operandStack.push(new AETNode(operatorStack.pop(), null, null));
+					addNode(operandStack, operatorStack.pop());
+				}
+				operatorStack.push(s);
+			}
+		}
+		while (!operatorStack.isEmpty()) {
+			if (operatorStack.peek().equals("(")) {
+				setIsValid(false);
+				break;
+			} else {
+				addNode(operandStack, operatorStack.pop());
+			}
+		}
+		return operandStack.peek();
 
 		// for (String s : theInfixList) {
 		// char c = s.charAt(0);
@@ -191,7 +219,6 @@ public class ExpressionParser {
 		// while (!operatorStack.isEmpty()) {
 		// addNode(operandStack, operatorStack.pop());
 		// }
-		return operandStack.pop();
 	}
 
 	/**
