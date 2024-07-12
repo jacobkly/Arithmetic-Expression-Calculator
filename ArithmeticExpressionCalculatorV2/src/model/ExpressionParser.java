@@ -135,11 +135,12 @@ public class ExpressionParser {
 				setIsValid(false);
 				break;
 			} else {
-				if (isFunction(operatorStack.peek())) {
-					output.add(operatorStack.pop());
-				} else {
-					output.add(operatorStack.pop());
-				}
+				// if (isFunction(operatorStack.peek())) {
+				// output.add(operatorStack.pop());
+				// } else {
+				// output.add(operatorStack.pop());
+				// }
+				output.add(operatorStack.pop());
 			}
 		}
 		System.out.println("\n" + output);
@@ -152,17 +153,23 @@ public class ExpressionParser {
 		myIsValid = true;
 
 		for (String s : theInfixList) {
-			if (s.matches("-?\\d+(\\.\\d+)?")) {
+			if (s.matches("-?\\d+(\\.\\d+)?") || s.equals("pi") || s.equals("e")) {
 				operandStack.push(new AETNode(s, null, null));
+			} else if (isFunction(s)) {
+				operatorStack.push(s);
 			} else if (s.charAt(0) == '(') {
 				operatorStack.push(s);
 			} else if (s.charAt(0) == ')') {
 				try {
-					while (!operatorStack.peek().equals("(") && !operatorStack.isEmpty()) {
+					while (!operatorStack.peek().equals("(") && !operatorStack.isEmpty() &&
+					    !isFunction(operatorStack.peek())) {
 						addNode(operandStack, operatorStack.pop());
 					}
 					if (operatorStack.peek().equals("(")) {
 						operatorStack.pop();
+					}
+					if (operatorStack.peek().equals(null) && isFunction(operatorStack.peek())) {
+						addNode(operandStack, operatorStack.pop());
 					}
 				} catch (final Exception error) {
 					setIsValid(false);
@@ -183,42 +190,12 @@ public class ExpressionParser {
 				setIsValid(false);
 				break;
 			} else {
+				System.out.println(2);
 				addNode(operandStack, operatorStack.pop());
 			}
 		}
+		System.out.println(operandStack.peek().toString());
 		return operandStack.peek();
-
-		// for (String s : theInfixList) {
-		// char c = s.charAt(0);
-		// String popped;
-		//
-		// if (Character.isDigit(c)) {
-		// operandStack.push(new AETNode(s, null, null));
-		// } else if (s == "(") {
-		// operatorStack.push(s);
-		// } else if (s == ")") {
-		// while (!operatorStack.isEmpty()) {
-		// popped = operatorStack.pop();
-		// if (popped == "(") {
-		// continue;
-		// } else {
-		// addNode(operandStack, popped);
-		// }
-		// }
-		// throw new IllegalStateException("Misplaced closing parenthesis. " +
-		// "Please try again.");
-		// } else {
-		// while (!operatorStack.isEmpty() &&
-		// (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
-		// isLeftAssociative(s)) {
-		// operandStack.push(new AETNode(operatorStack.pop(), null, null));
-		// }
-		// operatorStack.push(s);
-		// }
-		// }
-		// while (!operatorStack.isEmpty()) {
-		// addNode(operandStack, operatorStack.pop());
-		// }
 	}
 
 	/**
@@ -251,7 +228,7 @@ public class ExpressionParser {
 		final boolean length = theString.length() > 1;
 		if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
 			result = true;
-		} else if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
+		} else if (length && myValidFunctions.containsKey(theString.substring(0, 3))) {
 			result = true;
 		}
 		return result;
@@ -267,7 +244,6 @@ public class ExpressionParser {
 	 */
 	private static int getPrecedence(final String theOperator) {
 		int precedence = -1;
-
 		switch (theOperator) {
 			case "-":
 				precedence = 2;
@@ -285,7 +261,6 @@ public class ExpressionParser {
 				precedence = 4;
 				break;
 		}
-
 		return precedence;
 	}
 
@@ -299,20 +274,25 @@ public class ExpressionParser {
 	 */
 	private static boolean isLeftAssociative(final String theOperator) {
 		boolean result;
-
 		if (theOperator == "-" || theOperator == "+" ||
 		    theOperator == "/" || theOperator == "*") {
 			result = true;
 		} else {
 			result = false;
 		}
-
 		return result;
 	}
 
-	private static void addNode(final Deque<AETNode> theStack, final String theOperator) {
-		final AETNode rightASTNode = theStack.pop();
-		final AETNode leftASTNode = theStack.pop();
-		theStack.push(new AETNode(theOperator, leftASTNode, rightASTNode));
+	private static void addNode(final Deque<AETNode> theOperandStack,
+	    final String theOpOrFunc) {
+		if (isFunction(theOpOrFunc)) {
+			final AETNode leftAETNode = theOperandStack.pop();
+			theOperandStack.push(new AETNode(theOpOrFunc, leftAETNode, null));
+		} else { // else theOpOrFunc is an operator
+			System.out.println(1);
+			final AETNode rightAETNode = theOperandStack.pop();
+			final AETNode leftAETNode = theOperandStack.pop();
+			theOperandStack.push(new AETNode(theOpOrFunc, leftAETNode, rightAETNode));
+		}
 	}
 }
