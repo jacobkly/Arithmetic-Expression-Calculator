@@ -227,7 +227,11 @@ public class ExpressionParser {
 	 * @param theString the string being examined as a function
 	 * @return true if the string is a function; otherwise false
 	 */
-	private static boolean isFunction(final String theString) {
+	public static boolean isFunction(final String theString) {
+		if (theString.equals("pi")) {
+			return false;
+		}
+
 		boolean result = false;
 		final boolean length = theString.length() > 1;
 		if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
