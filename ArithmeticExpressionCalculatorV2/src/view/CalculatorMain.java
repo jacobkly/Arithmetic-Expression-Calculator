@@ -16,15 +16,18 @@ import structures.AETNode;
  * integer and decimal numbers, along with simple logarithmic and trigonometric functions, and
  * the following five operators: -, +, /, *, ^.
  *
- * To see how to correctly use this calculator, please read the GitHub README.md.
+ * To see how to correctly use this calculator, please read the GitHub README.md when
+ * instructions for calculator V2 are out.
  *
  * @author Jacob Klymenko
- * @version 2.0
+ * @version 2.1
  */
 public final class CalculatorMain {
 
 	/** The user inputed infix notation arithmetic expression. */
 	private static String myUserInput = "";
+
+	private static boolean myUserQuitOption = false;
 
 	/** A private constructor to inhibit external instantiation. */
 	private CalculatorMain() {
@@ -42,7 +45,7 @@ public final class CalculatorMain {
 		try (Scanner console = new Scanner(System.in)) {
 			for (;;) {
 				start(console);
-				if (!startAgain(console)) {
+				if (myUserQuitOption) {
 					break;
 				}
 			}
@@ -57,7 +60,8 @@ public final class CalculatorMain {
 	 * @param theConsole a Scanner used to gather user input
 	 */
 	private static void start(final Scanner theConsole) {
-		final String prompt = "\nEnter an expression: ";
+		final String prompt = "\nenter an expression (or \"Q\" to quit): ";
+
 		// final ArrayList<String> rpn = getRPN(theConsole, prompt);
 		// try {
 		// final double output = Evaluator.evaluateRPN(rpn);
@@ -66,10 +70,19 @@ public final class CalculatorMain {
 		// } catch (final Exception error) {
 		// System.out.println("Evaluation error has occured!");
 		// }
-		final ArrayList<String> list = getList(theConsole, prompt);
-		final AETNode tree = ExpressionParser.shuntingYardTree(list);
-		final double output = Evaluator.evaluateAET(tree);
-		System.out.println("\n" + myUserInput + " = " + output);
+
+		final AETNode tree = getTree(theConsole, prompt);
+
+		if (myUserQuitOption) {
+			return;
+		} else {
+			try {
+				final double output = Evaluator.evaluateAET(tree);
+				System.out.println("\n" + myUserInput + " = " + output);
+			} catch (final Exception error) {
+				System.out.println("evaluation error has occured!");
+			}
+		}
 	}
 
 	/**
@@ -88,52 +101,60 @@ public final class CalculatorMain {
 	private static ArrayList<String> getRPN(final Scanner theConsole, final String thePrompt) {
 		System.out.print(thePrompt);
 		myUserInput = theConsole.nextLine();
+
+		if (isUserQuitting(myUserInput)) {
+			return new ArrayList<String>();
+		}
+
 		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
 		ArrayList<String> rpn = ExpressionParser.shuntingYardRPN(list);
-
 		while (!ExpressionParser.getIsValid()) {
 			System.out.println("Not a valid arithmetic expression. \nYour input may " +
 			    "contain misplaced parentheses. \n\nPlease try again.");
 			System.out.print(thePrompt);
 			myUserInput = theConsole.nextLine();
+			if (isUserQuitting(myUserInput)) {
+				return new ArrayList<String>();
+			}
 			list = ExpressionParser.stringToList(myUserInput);
 			rpn = ExpressionParser.shuntingYardRPN(list);
 		}
 		return rpn;
 	}
 
-	private static ArrayList<String> getList(final Scanner theConsole,
-	    final String thePrompt) {
+	private static AETNode getTree(final Scanner theConsole, final String thePrompt) {
 		System.out.print(thePrompt);
 		myUserInput = theConsole.nextLine();
+
+		if (isUserQuitting(myUserInput)) {
+			AETNode quit = null;
+			return quit;
+		}
+
 		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
-		return list;
+		AETNode tree = ExpressionParser.shuntingYardTree(list);
+		while (!ExpressionParser.getIsValid()) {
+			System.out.println("Not a valid arithmetic expression. \nYour input may " +
+			    "contain misplaced parentheses. \n\nPlease try again.");
+			System.out.print(thePrompt);
+			myUserInput = theConsole.nextLine();
+			if (isUserQuitting(myUserInput)) {
+				AETNode quit = null;
+				return quit;
+			}
+			list = ExpressionParser.stringToList(myUserInput);
+			tree = ExpressionParser.shuntingYardTree(list);
+		}
+		return tree;
 	}
 
-	/**
-	 * Asks if the user wants to evaluate another arithmetic expression and returns true/false
-	 * depending on the user's answer.
-	 *
-	 * @param theConsole a Scanner used to gather user input
-	 * @return true if the user wants to evaluate another expression; false otherwise
-	 */
-	private static boolean startAgain(final Scanner theConsole) {
-		boolean response = false;
-
-		while (true) {
-			System.out.print("\nDo you want to evaluate another arithmetic expression? Y/N: ");
-
-			final String again = theConsole.nextLine();
-			if ("Y".equalsIgnoreCase(again) || "YES".equalsIgnoreCase(again)) {
-				response = true;
-				break;
-			} else if ("N".equalsIgnoreCase(again) || "NO".equalsIgnoreCase(again)) {
-				response = false;
-				break;
-			} else {
-				System.out.println("I did not understand your answer.");
-			}
+	private static boolean isUserQuitting(final String theUserInput) {
+		if (myUserInput.equals("Q") || myUserInput.equals("q")) {
+			myUserQuitOption = true;
+			return true;
+		} else {
+			myUserQuitOption = false;
+			return false;
 		}
-		return response;
 	}
 }
