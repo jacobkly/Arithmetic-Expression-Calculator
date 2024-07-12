@@ -67,25 +67,65 @@ public class Evaluator {
 	 * @return the value of the arithmetic expression tree (AET)
 	 */
 	public static double evaluateAET(final AETNode theTree) {
-		switch (theTree.getValue()) {
-			case "-":
-				return evaluateAET(theTree.getLeftAETNode()) -
-				    evaluateAET(theTree.getRightAETNode());
-			case "+":
-				return evaluateAET(theTree.getLeftAETNode()) +
-				    evaluateAET(theTree.getRightAETNode());
-			case "/":
-				return evaluateAET(theTree.getLeftAETNode()) /
-				    evaluateAET(theTree.getRightAETNode());
-			case "*":
-				return evaluateAET(theTree.getLeftAETNode()) *
-				    evaluateAET(theTree.getRightAETNode());
-			case "^":
-				return Math.pow(evaluateAET(theTree.getLeftAETNode()),
-				    evaluateAET(theTree.getRightAETNode()));
-			default:
-				return Double.valueOf(theTree.getValue());
+		double result = 0.0;
+		if (ExpressionParser.isFunction(theTree.getValue())) {
+			double leftSubTree = evaluateAET(theTree.getLeftAETNode());
+			result = applyFunction(theTree.getValue(), leftSubTree);
+		} else {
+			switch (theTree.getValue()) {
+				case "-":
+					result = evaluateAET(theTree.getLeftAETNode()) -
+					    evaluateAET(theTree.getRightAETNode());
+					break;
+				case "+":
+					result = evaluateAET(theTree.getLeftAETNode()) +
+					    evaluateAET(theTree.getRightAETNode());
+					break;
+				case "/":
+					result = evaluateAET(theTree.getLeftAETNode()) /
+					    evaluateAET(theTree.getRightAETNode());
+					break;
+				case "*":
+					result = evaluateAET(theTree.getLeftAETNode()) *
+					    evaluateAET(theTree.getRightAETNode());
+					break;
+				case "^":
+					result = Math.pow(evaluateAET(theTree.getLeftAETNode()),
+					    evaluateAET(theTree.getRightAETNode()));
+					break;
+				case "e":
+					result = Math.E;
+					break;
+				case "pi":
+					result = Math.PI;
+					break;
+				default:
+					result = Double.valueOf(theTree.getValue());
+					break;
+			}
 		}
+		return result;
+
+		// switch (theTree.getValue()) {
+		// case "-":
+		// return evaluateAET(theTree.getLeftAETNode()) -
+		// evaluateAET(theTree.getRightAETNode());
+		// case "+":
+		// return evaluateAET(theTree.getLeftAETNode()) +
+		// evaluateAET(theTree.getRightAETNode());
+		// case "/":
+		// return evaluateAET(theTree.getLeftAETNode()) /
+		// evaluateAET(theTree.getRightAETNode());
+		// case "*":
+		// return evaluateAET(theTree.getLeftAETNode()) *
+		// evaluateAET(theTree.getRightAETNode());
+		// case "^":
+		// return Math.pow(evaluateAET(theTree.getLeftAETNode()),
+		// evaluateAET(theTree.getRightAETNode()));
+		// default:
+		// return Double.valueOf(theTree.getValue());
+		// }
+
 	}
 
 	/**
