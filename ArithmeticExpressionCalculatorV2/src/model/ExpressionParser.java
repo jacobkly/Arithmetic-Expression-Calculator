@@ -168,7 +168,8 @@ public class ExpressionParser {
 					if (operatorStack.peek().equals("(")) {
 						operatorStack.pop();
 					}
-					if (operatorStack.peek().equals(null) && isFunction(operatorStack.peek())) {
+					if (operatorStack.peek() != null &&
+					    isFunction(operatorStack.peek())) {
 						addNode(operandStack, operatorStack.pop());
 					}
 				} catch (final Exception error) {
@@ -182,19 +183,22 @@ public class ExpressionParser {
 					// operandStack.push(new AETNode(operatorStack.pop(), null, null));
 					addNode(operandStack, operatorStack.pop());
 				}
+				// System.out.println(3);
 				operatorStack.push(s);
 			}
 		}
+		// System.out.println(operatorStack);
 		while (!operatorStack.isEmpty()) {
-			if (operatorStack.peek().equals("(")) {
+			String top = operatorStack.peek();
+			if (top.equals("(")) {
 				setIsValid(false);
 				break;
-			} else {
-				System.out.println(2);
+			} else if (getPrecedence(top) > 0 || isFunction(top)) {
+				// System.out.println(2);
 				addNode(operandStack, operatorStack.pop());
 			}
 		}
-		System.out.println(operandStack.peek().toString());
+		// System.out.println(operandStack.peek().toString());
 		return operandStack.peek();
 	}
 
@@ -289,7 +293,7 @@ public class ExpressionParser {
 			final AETNode leftAETNode = theOperandStack.pop();
 			theOperandStack.push(new AETNode(theOpOrFunc, leftAETNode, null));
 		} else { // else theOpOrFunc is an operator
-			System.out.println(1);
+			// System.out.println(1);
 			final AETNode rightAETNode = theOperandStack.pop();
 			final AETNode leftAETNode = theOperandStack.pop();
 			theOperandStack.push(new AETNode(theOpOrFunc, leftAETNode, rightAETNode));
