@@ -33,7 +33,7 @@ public class ExpressionParser {
 	 *		0 -> no base value
 	 * 		1 -> has base value
 	 */
-	private static Map<String, Integer> myValidFunctions = new HashMap<String, Integer>();
+	private static Map<String, Integer> myFunctions = new HashMap<String, Integer>();
 
 	/** A private constructor to inhibit external instantiation. */
 	private ExpressionParser() {
@@ -44,14 +44,14 @@ public class ExpressionParser {
 	 * Sets all the valid mathematical functions this calculator accepts from the user.
 	 */
 	public static void setValidFunctions() {
-		myValidFunctions.put("sin", 0);
-		myValidFunctions.put("cos", 0);
-		myValidFunctions.put("tan", 0);
-		myValidFunctions.put("sec", 0);
-		myValidFunctions.put("csc", 0);
-		myValidFunctions.put("cot", 0);
-		myValidFunctions.put("log", 1);
-		myValidFunctions.put("ln", 1);
+		myFunctions.put("sin", 0);
+		myFunctions.put("cos", 0);
+		myFunctions.put("tan", 0);
+		myFunctions.put("sec", 0);
+		myFunctions.put("csc", 0);
+		myFunctions.put("cot", 0);
+		myFunctions.put("log", 1);
+		myFunctions.put("ln", 1);
 	}
 
 	/**
@@ -114,17 +114,18 @@ public class ExpressionParser {
 					}
 					// gotta check for null b/c previous if statement might empty out the stack
 					// when dealing with the last closing parenthesis
-					if (operatorStack.equals(null) && isFunction(operatorStack.peek())) {
+					if (operatorStack.peek() != null && isFunction(operatorStack.peek())) {
 						output.add(operatorStack.pop());
 					}
 				} catch (final Exception error) {
 					setIsValid(false);
 					break;
 				}
-			} else {
-				while (!operatorStack.isEmpty() &&
-				    (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
-				    isLeftAssociative(s)) {
+			} else { // the string is an operator
+				while (!operatorStack.isEmpty() && getPrecedence(s) > 0 &&
+				    (getPrecedence(operatorStack.peek()) > getPrecedence(s) ||
+				        (getPrecedence(operatorStack.peek()) == getPrecedence(s) &&
+				            isLeftAssociative(s)))) {
 					output.add(operatorStack.pop());
 				}
 				operatorStack.push(s);
@@ -135,11 +136,7 @@ public class ExpressionParser {
 				setIsValid(false);
 				break;
 			} else {
-				// if (isFunction(operatorStack.peek())) {
-				// output.add(operatorStack.pop());
-				// } else {
-				// output.add(operatorStack.pop());
-				// }
+				// System.out.println(2);
 				output.add(operatorStack.pop());
 			}
 		}
@@ -176,10 +173,11 @@ public class ExpressionParser {
 					setIsValid(false);
 					break;
 				}
-			} else {
-				while (!operatorStack.isEmpty() &&
-				    (getPrecedence(s) <= getPrecedence(operatorStack.peek())) &&
-				    isLeftAssociative(s)) {
+			} else { // the string is an operator
+				while (!operatorStack.isEmpty() && getPrecedence(s) > 0 &&
+				    (getPrecedence(operatorStack.peek()) > getPrecedence(s) ||
+				        (getPrecedence(operatorStack.peek()) == getPrecedence(s) &&
+				            isLeftAssociative(s)))) {
 					// operandStack.push(new AETNode(operatorStack.pop(), null, null));
 					addNode(operandStack, operatorStack.pop());
 				}
@@ -228,18 +226,14 @@ public class ExpressionParser {
 	 * @return true if the string is a function; otherwise false
 	 */
 	public static boolean isFunction(final String theString) {
-		if (theString.equals("pi")) {
+		final int length = theString.length();
+		if (length > 1 && myFunctions.containsKey(theString.substring(0, length))) {
+			return true;
+		} else if (length > 4 && myFunctions.containsKey(theString.substring(0, 3))) {
+			return true;
+		} else {
 			return false;
 		}
-
-		boolean result = false;
-		final boolean length = theString.length() > 1;
-		if (length && myValidFunctions.containsKey(theString.substring(0, 2))) {
-			result = true;
-		} else if (length && myValidFunctions.containsKey(theString.substring(0, 3))) {
-			result = true;
-		}
-		return result;
 	}
 
 	/**
