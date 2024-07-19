@@ -55,10 +55,7 @@ public final class CalculatorMain {
 
 	/**
 	 * Starts the first round of asking for and evaluating an arithmetic expression into its
-	 * respective value.
-	 *
-	 * There are two different ways the the user input is evaluated. Comment out either
-	 * section (and uncomment the other) to see them working.
+	 * respective value. Both methods of parsing and evaluation are shown to the user.
 	 *
 	 * @param theConsole a Scanner used to gather user input
 	 */
@@ -85,12 +82,10 @@ public final class CalculatorMain {
 
 	/**
 	 * Repeatedly waits for an expression in infix notation entered by the user. It first runs
-	 * the input through and separates substrings surrounded by space characters. This is to
-	 * correctly feed the user input into the shunting yard parsing algorithm.
+	 * the input through and separates substrings surrounded by space characters to then
+	 * correctly feed the user input into the shunting yard algorithm.
 	 *
-	 * To handled potential misplaced parentheses, it evaluates the first input, and if the
-	 * expression contains misplaced parentheses, the user is prompted once more. Otherwise,
-	 * it returns the expression in RPN of the user inputed infix notation expression.
+	 * The method also handles any misplaced parentheses by asking the user to input once more.
 	 *
 	 * @param theConsole a Scanner used to gather user input
 	 * @param thePrompt the prompt to display to the user
@@ -116,6 +111,17 @@ public final class CalculatorMain {
 		return rpn;
 	}
 
+	/**
+	 * Repeatedly waits for an expression in infix notation to be entered by the user. It
+	 * first runs the input through and seperates substring surrounded by space characters to
+	 * then correctly feed the user input into the shunting yard algorithm.
+	 *
+	 * The method also handles any misplaced parentheses by asking the user to input once more.
+	 *
+	 * @param theConsole a Scanner used to gather user input
+	 * @param thePrompt the prompt to display to the user
+	 * @return the expression in an AETNode of the user inputed infix notation expression
+	 */
 	private static AETNode getTree(final Scanner theConsole, final String thePrompt) {
 		if (isUserQuitting(myUserInput)) {
 			AETNode quit = null;
@@ -138,6 +144,12 @@ public final class CalculatorMain {
 		return tree;
 	}
 
+	/**
+	 * Return true if the user input is an upper or lower case 'q'. Otherwise return false.
+	 *
+	 * @param theUserInput the user's input
+	 * @return true if the user input is an upper or lower case 'q'; otherwise false
+	 */
 	private static boolean isUserQuitting(final String theUserInput) {
 		if (myUserInput.equals("Q") || myUserInput.equals("q")) {
 			myUserQuitOption = true;
@@ -148,9 +160,16 @@ public final class CalculatorMain {
 		}
 	}
 
+	/**
+	 * Displays the result of the list and tree evaluation methods for the user inputed
+	 * expression. Outputs both the list and tree evaluation lines sequentially.
+	 *
+	 * @param theEvalMethod the method of evaluation for the user expression
+	 * @param theUserInput the user inputed expression
+	 * @param theResult the result of the method of evaluation
+	 */
 	private static void displayResult(final String theEvalMethod, final String theUserInput,
 	    final double theResult) {
-
 		if (theEvalMethod == "List") {
 			System.out.print("\n");
 		}
