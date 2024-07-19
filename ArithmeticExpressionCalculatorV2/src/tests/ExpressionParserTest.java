@@ -1,6 +1,7 @@
-/**
- *
+/*
+ * ExpressionParserTest - Arithmetic Expression Calculator V2
  */
+
 package tests;
 
 import java.util.ArrayList;
@@ -14,7 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
+ * This class tests the ExpressionParser class in the model package.
  *
+ * @author Jacob Klymenko
+ * @version 2.0
  */
 class ExpressionParserTest {
 

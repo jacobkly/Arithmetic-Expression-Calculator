@@ -1,6 +1,7 @@
-/**
- *
+/*
+ * EvaluatorTest - Arithmetic Expression Calculator V2
  */
+
 package tests;
 
 import java.util.ArrayList;
@@ -11,7 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
+ * This class tests the Evaluator class in the model package.
  *
+ * @author Jacob Klymenko
+ * @version 2.0
  */
 public class EvaluatorTest {
 
