@@ -20,7 +20,7 @@ import structures.AETNode;
  * instructions for calculator V2 are out.
  *
  * @author Jacob Klymenko
- * @version 2.1
+ * @version 2.2
  */
 public final class CalculatorMain {
 
@@ -57,30 +57,28 @@ public final class CalculatorMain {
 	 * Starts the first round of asking for and evaluating an arithmetic expression into its
 	 * respective value.
 	 *
+	 * There are two different ways the the user input is evaluated. Comment out either
+	 * section (and uncomment the other) to see them working.
+	 *
 	 * @param theConsole a Scanner used to gather user input
 	 */
 	private static void start(final Scanner theConsole) {
-		final String prompt = "\nenter an expression (or \"Q\" to quit): ";
-
-		// final ArrayList<String> rpn = getRPN(theConsole, prompt);
-		// try {
-		// final double output = Evaluator.evaluateRPN(rpn);
-		// // Reports the user entered expression and resulting value.
-		// System.out.println("\n" + myUserInput + " = " + output);
-		// } catch (final Exception error) {
-		// System.out.println("Evaluation error has occured!");
-		// }
-
+		final String prompt = "\nenter an expression (or \"q\" to quit): ";
+		System.out.print(prompt);
+		myUserInput = theConsole.nextLine();
+		// handles and evaluates the user input using a list and tree.
+		final ArrayList<String> rpn = getRPN(theConsole, prompt);
 		final AETNode tree = getTree(theConsole, prompt);
-
 		if (myUserQuitOption) {
 			return;
 		} else {
 			try {
-				final double output = Evaluator.evaluateAET(tree);
-				System.out.println("\n" + myUserInput + " = " + output);
+				final double listOutput = Evaluator.evaluateRPN(rpn);
+				displayResult("List", myUserInput, listOutput);
+				final double treeOutput = Evaluator.evaluateAET(tree);
+				displayResult("Tree", myUserInput, treeOutput);
 			} catch (final Exception error) {
-				System.out.println("evaluation error has occured!");
+				System.out.println("Evaluation error has occured!");
 			}
 		}
 	}
@@ -99,13 +97,9 @@ public final class CalculatorMain {
 	 * @return the expression in RPN of the user inputed infix notation expression
 	 */
 	private static ArrayList<String> getRPN(final Scanner theConsole, final String thePrompt) {
-		System.out.print(thePrompt);
-		myUserInput = theConsole.nextLine();
-
 		if (isUserQuitting(myUserInput)) {
 			return new ArrayList<String>();
 		}
-
 		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
 		ArrayList<String> rpn = ExpressionParser.shuntingYardRPN(list);
 		while (!ExpressionParser.getIsValid()) {
@@ -123,14 +117,10 @@ public final class CalculatorMain {
 	}
 
 	private static AETNode getTree(final Scanner theConsole, final String thePrompt) {
-		System.out.print(thePrompt);
-		myUserInput = theConsole.nextLine();
-
 		if (isUserQuitting(myUserInput)) {
 			AETNode quit = null;
 			return quit;
 		}
-
 		ArrayList<String> list = ExpressionParser.stringToList(myUserInput);
 		AETNode tree = ExpressionParser.shuntingYardTree(list);
 		while (!ExpressionParser.getIsValid()) {
@@ -156,5 +146,14 @@ public final class CalculatorMain {
 			myUserQuitOption = false;
 			return false;
 		}
+	}
+
+	private static void displayResult(final String theEvalMethod, final String theUserInput,
+	    final double theResult) {
+
+		if (theEvalMethod == "List") {
+			System.out.print("\n");
+		}
+		System.out.println(theEvalMethod + " Evaluation: " + theUserInput + " = " + theResult);
 	}
 }
