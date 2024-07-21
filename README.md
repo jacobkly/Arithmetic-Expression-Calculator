@@ -6,11 +6,11 @@ The following user input rules apply:
   - Only integer and decimal numbers are acceptable for numbers/operands.
   - Only the following five operators are acceptable: '+', '-', '*', '/', '^'.
   - Only the following eight mathematical functions are acceptable: "sin", "cos", "tan", "sec", "csc", "cot", "log", "ln".
-    ~ For trigonometric functions, the argument value is assumed to be in radians.
-    ~ For logarithmic functions, custom bases should follow an underscore character after the function. For example, "log_2" or "log_10".
-    ~ Euler's number and pi can be inputted as "e" and "pi".
+    - For trigonometric functions, the argument value is assumed to be in radians.
+    - For logarithmic functions, custom bases should follow an underscore character after the function. For example, "log_2" or "log_10".
+    - Euler's number and pi can be inputted as "e" and "pi".
   - Between each distinct segment of the input expression, a space should be present.
-    ~ For example, the expression "(((3 + 2) - 1) ^ 2)" should be "( ( ( 3 + 2 ) - 1 ) ^ 2 )" and "sin(pi/2) - log_2(2)" should be "sin ( pi / 2 ) - log_2 ( 2 )".
+    - For example, the expression "(((3 + 2) - 1) ^ 2)" should be "( ( ( 3 + 2 ) - 1 ) ^ 2 )" and "sin(pi/2) - log_2(2)" should be "sin ( pi / 2 ) - log_2 ( 2 )".
 
 ## How does the calculator (V2) work?
   1. The calculator takes the user's input expression as a string and separates it into a List, keeping the infix notation characteristic of the expression.
